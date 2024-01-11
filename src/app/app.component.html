@@ -1,0 +1,15 @@
+<div class="navbar">
+  <img src="/assets/fundment-logo.svg" alt="Fundment" class="logo" />
+
+  <h1>{{title}}</h1>
+
+  <div class="navbar-right">
+    <a routerLink="/transactions" routerLinkActive="active">Transactions</a>
+    <a routerLink="/transaction-create" routerLinkActive="active">New Transaction</a>
+    </div>
+</div>
+
+<div style="margin-top: 30px;">
+  <router-outlet></router-outlet>
+</div>
+

@@ -1,0 +1,20 @@
+<div mat-dialog-content>
+  
+  <ng-container *ngIf="success; else error">
+    
+    <div class="success-message">Transaction saved successfully. </div>
+    
+    Would you like to make another transaction?
+
+    <div mat-dialog-actions>
+      <button mat-raised-button [mat-dialog-close]="0">Yes</button>
+      <button mat-raised-button [mat-dialog-close]="1">No</button>
+    </div>
+  </ng-container>
+  
+  <ng-template #error>
+    <div class="error-message">
+      <span>There was an error saving the transaction. Please try again after sometime or report this issue</span>
+    </div>
+  </ng-template>
+</div>

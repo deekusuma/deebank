@@ -1,0 +1,211 @@
+<div class="container">
+  <form [formGroup]="transactionForm" class="form" (ngSubmit)="onSubmit()">
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Transaction</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-radio-group
+          aria-label="Select an option"
+          class="form-element"
+          [formControlName]="transactionTypeFieldName"
+        >
+          <mat-label>Type</mat-label>
+          <mat-radio-button
+            *ngFor="let t of transactionTypes | keyvalue"
+            [value]="t.value"
+            >{{ t.value }}</mat-radio-button
+          >
+          <mat-error
+            *ngIf="
+              transactionForm
+                .get(transactionTypeFieldName)
+                ?.hasError('required')
+            "
+          >
+            Choose a transaction type
+          </mat-error>
+        </mat-radio-group>
+
+        <ng-container *ngIf="bankAccount$ | async as bankAccounts">
+          <mat-form-field
+            class="form-element"
+            *ngIf="formVisibility.showSourceAccount"
+          >
+            <mat-label>From Account</mat-label>
+            <mat-select
+              [formControlName]="sourceAccountFieldName"
+              [errorStateMatcher]="matcher"
+            >
+              <mat-option
+                *ngFor="let account of bankAccounts"
+                [value]="account"
+              >
+                <ng-container
+                  *ngTemplateOutlet="
+                    accountTemplate;
+                    context: { account: account }
+                  "
+                ></ng-container>
+              </mat-option>
+            </mat-select>
+            <mat-error
+              *ngIf="
+                transactionForm
+                  .get(sourceAccountFieldName)
+                  ?.hasError('required')
+              "
+            >
+              Choose From Account
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field
+            class="form-element"
+            *ngIf="formVisibility.showTargetAccount"
+          >
+            <mat-label>To Account</mat-label>
+            <mat-select
+              [formControlName]="targetAccountFieldName"
+              [errorStateMatcher]="matcher"
+            >
+              <mat-option
+                *ngFor="let account of bankAccounts"
+                [value]="account"
+              >
+                <ng-container
+                  *ngTemplateOutlet="
+                    accountTemplate;
+                    context: { account: account }
+                  "
+                ></ng-container>
+              </mat-option>
+            </mat-select>
+
+            <mat-error
+              *ngIf="
+                transactionForm
+                  .get(targetAccountFieldName)
+                  ?.hasError('required')
+              "
+            >
+              Choose To Account
+            </mat-error>
+
+            <mat-error
+              *ngIf="
+                transactionForm
+                  .get(targetAccountFieldName)
+                  ?.hasError('transferAccountNotSameClient')
+              "
+            >
+              Transfer To Account must be from the same client as the Transfer
+              From Account
+            </mat-error>
+
+            <mat-error
+              *ngIf="
+                transactionForm
+                  .get(targetAccountFieldName)
+                  ?.hasError('transferAccountSame')
+              "
+            >
+              Transfer To Account cannot be the same as the Transfer From
+              Account
+            </mat-error>
+          </mat-form-field>
+        </ng-container>
+
+        <mat-radio-group
+          aria-label="Select an option"
+          class="form-element"
+          [formControlName]="fullAmountFieldName"
+          *ngIf="formVisibility.showFullAmount"
+        >
+          <mat-label
+            >Would you like to withdraw the full value
+            <ng-container *ngIf="maxAmount > 0"
+              >({{ maxAmount | currency }})</ng-container
+            >
+            of this account?</mat-label
+          >
+          <mat-radio-button [value]="true">Yes</mat-radio-button>
+          <mat-radio-button [value]="false">No</mat-radio-button>
+        </mat-radio-group>
+
+        <mat-form-field class="form-element" *ngIf="formVisibility.showAmount">
+          <mat-label>Amount (£)</mat-label>
+          <input
+            type="number"
+            matInput
+            placeholder="Amount"
+            [formControlName]="amountFieldName"
+            [errorStateMatcher]="matcher"
+          />
+
+          <mat-error
+            *ngIf="
+              transactionForm.get(amountFieldName)?.hasError('required') ||
+              transactionForm.get(amountFieldName)?.hasError('min')
+            "
+          >
+            Please enter a valid amount
+          </mat-error>
+
+          <mat-hint *ngIf="formVisibility.showSourceAccount && maxAmount > 0">
+            Maximum amount available to
+            {{
+              transactionForm.get(transactionTypeFieldName)?.value | lowercase
+            }}
+            is {{ maxAmount | currency }}
+          </mat-hint>
+
+          <mat-error
+            *ngIf="transactionForm.get(amountFieldName)?.hasError('max')"
+          >
+            Insufficient funds. Amount cannot be greater than
+            {{ maxAmount | currency }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="form-element">
+          <mat-label>Description</mat-label>
+          <input
+            matInput
+            placeholder="Description"
+            formControlName="description"
+            [errorStateMatcher]="matcher"
+          />
+          <mat-hint>Max length is 20 characters</mat-hint>
+          <mat-error
+            *ngIf="transactionForm.get('description')?.hasError('maxlength')"
+          >
+            Description cannot exceed {{ maxDescriptionLength }} characters
+          </mat-error>
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions>
+        <button
+          type="submit"
+          mat-raised-button
+          color="primary"
+          [disabled]="transactionForm.pristine"
+        >
+          Submit
+        </button>
+        <button mat-raised-button (click)="onCancel()">Cancel</button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+
+  <ng-template #accountTemplate let-account="account">
+    <span class="account-data-item"
+      >Name: {{ account.account_holder_name }}</span
+    >
+    <span class="account-data-item">Bank: {{ account.bank_name }}</span>
+    <span class="account-data-item"
+      >Account Number: {{ account.account_number }}</span
+    >
+    <span class="account-data-item">Sort Code: {{ account.sort_code }}</span>
+  </ng-template>
+</div>

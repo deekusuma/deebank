@@ -1,0 +1,65 @@
+<h2>Transactions List</h2>
+<ng-container *ngIf="dataSource$ | async | orderBy: 'id':'desc'  as dataSource">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>Transaction Id</th>
+      <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="transaction_type">
+      <th mat-header-cell *matHeaderCellDef>Transaction Type</th>
+      <td mat-cell *matCellDef="let element">{{ element.transaction_type }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef>Amount</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.amount | currency }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="source">
+      <th mat-header-cell *matHeaderCellDef>From Account</th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container
+          *ngTemplateOutlet="
+            element.source ? accountTemplate : noData;
+            context: { account: element.source }
+          "
+        ></ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="target">
+      <th mat-header-cell *matHeaderCellDef>To Account</th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container
+          *ngTemplateOutlet="
+            element.target ? accountTemplate : noData;
+            context: { account: element.target }
+          "
+        ></ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Description</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.description || "---" }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+
+  <ng-template #accountTemplate let-account="account">
+    <span class="account-data-item">Name: {{ account.account_holder_name }}</span>
+    <span class="account-data-item">Bank: {{ account.bank_name }}</span>
+    <span class="account-data-item">Account Number: {{ account.account_number}}</span>
+    <span class="account-data-item">Sort Code: {{ account.sort_code}}</span>
+  </ng-template>
+
+  <ng-template #noData>---</ng-template>
+</ng-container>
